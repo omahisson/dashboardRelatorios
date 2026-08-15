@@ -1,0 +1,1954 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light" />
+    <title>Radar de Sessões Persistentes</title>
+    <style>
+      :root {
+        --texto: #14282b;
+        --texto-suave: #607477;
+        --fundo: #f4f1ea;
+        --superficie: #fffdf8;
+        --linha: #d9ded9;
+        --verde: #126e70;
+        --verde-escuro: #0b4d4f;
+        --verde-claro: #dcebea;
+        --amarelo: #d58b2b;
+        --amarelo-claro: #faead0;
+        --vermelho: #bd5748;
+        --vermelho-claro: #f5dfda;
+        --sucesso: #36745a;
+        --sucesso-claro: #deece3;
+        --sombra: 0 18px 50px rgba(20, 40, 43, 0.09);
+        --raio: 22px;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        margin: 0;
+        min-width: 320px;
+        background:
+          radial-gradient(circle at 8% 0%, rgba(18, 110, 112, 0.12), transparent 30rem),
+          linear-gradient(180deg, #f8f6f0 0%, var(--fundo) 100%);
+        color: var(--texto);
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        font-variant-numeric: tabular-nums;
+      }
+
+      button,
+      input,
+      select {
+        font: inherit;
+      }
+
+      button {
+        cursor: pointer;
+      }
+
+      button:focus-visible,
+      input:focus-visible,
+      select:focus-visible,
+      [tabindex]:focus-visible {
+        outline: 3px solid rgba(213, 139, 43, 0.42);
+        outline-offset: 3px;
+      }
+
+      .limite {
+        width: min(1440px, calc(100% - 40px));
+        margin: 0 auto;
+      }
+
+      .barra-topo {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 24px;
+        min-height: 82px;
+      }
+
+      .marca {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-width: 0;
+      }
+
+      .simbolo-marca {
+        display: grid;
+        width: 38px;
+        height: 38px;
+        place-items: center;
+        border-radius: 12px;
+        background: var(--texto);
+        color: #fff;
+        box-shadow: 0 8px 18px rgba(20, 40, 43, 0.18);
+        font-size: 18px;
+        font-weight: 800;
+      }
+
+      .texto-marca {
+        display: grid;
+        gap: 1px;
+      }
+
+      .nome-marca {
+        font-weight: 800;
+        letter-spacing: -0.02em;
+      }
+
+      .brand-subtitle {
+        color: var(--texto-suave);
+        font-size: 12px;
+      }
+
+      .acoes-topo,
+      .acoes-inicio,
+      .acoes-filtros {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+
+      .botao {
+        display: inline-flex;
+        min-height: 44px;
+        align-items: center;
+        justify-content: center;
+        gap: 9px;
+        border: 1px solid transparent;
+        border-radius: 12px;
+        padding: 10px 16px;
+        transition: transform 150ms ease, box-shadow 150ms ease, background 150ms ease;
+        font-weight: 750;
+      }
+
+      .botao:hover:not(:disabled) {
+        transform: translateY(-1px);
+      }
+
+      .botao:disabled {
+        cursor: not-allowed;
+        opacity: 0.45;
+      }
+
+      .botao-principal {
+        background: var(--verde);
+        color: #fff;
+        box-shadow: 0 10px 24px rgba(18, 110, 112, 0.22);
+      }
+
+      .botao-principal:hover:not(:disabled) {
+        background: var(--verde-escuro);
+        box-shadow: 0 14px 28px rgba(18, 110, 112, 0.28);
+      }
+
+      .botao-secundario {
+        border-color: var(--linha);
+        background: rgba(255, 253, 248, 0.78);
+        color: var(--texto);
+      }
+
+      .botao-link {
+        min-height: 38px;
+        border-color: transparent;
+        background: transparent;
+        color: var(--verde-escuro);
+        padding-inline: 10px;
+      }
+
+      .icone {
+        display: inline-grid;
+        width: 22px;
+        height: 22px;
+        place-items: center;
+        font-size: 16px;
+        line-height: 1;
+      }
+
+      .inicio {
+        display: grid;
+        grid-template-columns: minmax(0, 1.08fr) minmax(390px, 0.92fr);
+        gap: 44px;
+        align-items: center;
+        min-height: calc(100vh - 132px);
+        padding: 48px 0 92px;
+      }
+
+      .rotulo {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 18px;
+        color: var(--verde-escuro);
+        font-size: 12px;
+        font-weight: 850;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+      }
+
+      .rotulo::before {
+        width: 28px;
+        height: 2px;
+        border-radius: 99px;
+        background: var(--amarelo);
+        content: "";
+      }
+
+      h1,
+      h2,
+      h3,
+      p {
+        margin-top: 0;
+      }
+
+      h1 {
+        max-width: 760px;
+        margin-bottom: 22px;
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: clamp(48px, 7vw, 88px);
+        font-weight: 500;
+        letter-spacing: -0.055em;
+        line-height: 0.96;
+      }
+
+      .texto-inicio {
+        max-width: 680px;
+        margin-bottom: 30px;
+        color: #496064;
+        font-size: clamp(17px, 1.8vw, 21px);
+        line-height: 1.58;
+      }
+
+      .caixa-arquivos {
+        position: relative;
+        overflow: hidden;
+        border: 1px solid rgba(18, 110, 112, 0.14);
+        border-radius: 30px;
+        background: rgba(255, 253, 248, 0.9);
+        box-shadow: var(--sombra);
+        padding: 22px;
+      }
+
+      .caixa-arquivos::before {
+        position: absolute;
+        top: -70px;
+        right: -60px;
+        width: 190px;
+        height: 190px;
+        border-radius: 50%;
+        background: rgba(18, 110, 112, 0.09);
+        content: "";
+      }
+
+      .area-arquivos {
+        position: relative;
+        display: grid;
+        min-height: 330px;
+        place-items: center;
+        border: 2px dashed #a9bfbb;
+        border-radius: 22px;
+        background: linear-gradient(145deg, rgba(220, 235, 234, 0.38), rgba(255, 253, 248, 0.72));
+        padding: 34px;
+        text-align: center;
+        transition: border-color 160ms ease, background 160ms ease, transform 160ms ease;
+      }
+
+      .area-arquivos.arrastando {
+        border-color: var(--verde);
+        background: var(--verde-claro);
+        transform: scale(1.01);
+      }
+
+      .simbolo-pasta {
+        display: grid;
+        width: 76px;
+        height: 62px;
+        place-items: center;
+        margin: 0 auto 24px;
+        border-radius: 14px 18px 18px 18px;
+        background: var(--amarelo-claro);
+        color: #9b5d0f;
+        font-size: 30px;
+        box-shadow: inset 0 0 0 1px rgba(213, 139, 43, 0.18);
+      }
+
+      .titulo-pasta {
+        margin-bottom: 8px;
+        font-size: 21px;
+        letter-spacing: -0.02em;
+      }
+
+      .texto-pasta {
+        max-width: 330px;
+        margin: 0 auto 22px;
+        color: var(--texto-suave);
+        font-size: 14px;
+        line-height: 1.55;
+      }
+
+      .recursos {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+        margin-top: 16px;
+      }
+
+      .recurso {
+        min-width: 0;
+        border-radius: 14px;
+        background: #f4f5ef;
+        padding: 14px 10px;
+        text-align: center;
+      }
+
+      .recurso strong {
+        display: block;
+        margin-bottom: 3px;
+        font-size: 13px;
+      }
+
+      .recurso span {
+        color: var(--texto-suave);
+        font-size: 11px;
+      }
+
+      .carregando {
+        width: 19px;
+        height: 19px;
+        border: 3px solid var(--verde-claro);
+        border-top-color: var(--verde);
+        border-radius: 50%;
+        animation: spin 700ms linear infinite;
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      .tela-processando {
+        position: fixed;
+        inset: 0;
+        z-index: 100;
+        display: grid;
+        place-items: center;
+        background: rgba(20, 40, 43, 0.76);
+        backdrop-filter: blur(10px);
+        padding: 24px;
+      }
+
+      .caixa-processando {
+        display: grid;
+        width: min(420px, 100%);
+        justify-items: center;
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        border-radius: 24px;
+        background: var(--superficie);
+        box-shadow: 0 28px 80px rgba(0, 0, 0, 0.28);
+        padding: 42px 30px;
+        text-align: center;
+      }
+
+      .caixa-processando .carregando {
+        width: 48px;
+        height: 48px;
+        margin-bottom: 22px;
+        border-width: 5px;
+      }
+
+      .caixa-processando strong {
+        margin-bottom: 8px;
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: 28px;
+        font-weight: 500;
+      }
+
+      .caixa-processando span:last-child {
+        color: var(--texto-suave);
+        font-size: 13px;
+      }
+
+      .painel {
+        padding: 28px 0 80px;
+      }
+
+      .escondido {
+        display: none !important;
+      }
+
+      .cabecalho-painel {
+        display: flex;
+        align-items: end;
+        justify-content: space-between;
+        gap: 24px;
+        margin-bottom: 24px;
+      }
+
+      .cabecalho-painel h1 {
+        margin-bottom: 8px;
+        font-size: clamp(38px, 5vw, 62px);
+      }
+
+      .resumo-pasta {
+        margin: 0;
+        color: var(--texto-suave);
+        font-size: 14px;
+      }
+
+      .filtros {
+        display: flex;
+        align-items: end;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+
+      .campo {
+        display: grid;
+        gap: 6px;
+      }
+
+      .campo label {
+        color: var(--texto-suave);
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .campo select,
+      .campo input {
+        min-height: 42px;
+        border: 1px solid var(--linha);
+        border-radius: 11px;
+        background: var(--superficie);
+        color: var(--texto);
+        padding: 9px 12px;
+      }
+
+      .campo input {
+        width: min(260px, 100%);
+      }
+
+      .grade-resultado {
+        display: grid;
+        grid-template-columns: minmax(360px, 1.15fr) minmax(0, 1.85fr);
+        gap: 18px;
+        margin-bottom: 18px;
+      }
+
+      .cartao {
+        break-inside: avoid;
+        border: 1px solid rgba(20, 40, 43, 0.09);
+        border-radius: var(--raio);
+        background: rgba(255, 253, 248, 0.94);
+        box-shadow: 0 10px 34px rgba(20, 40, 43, 0.055);
+      }
+
+      .cartao-resultado {
+        display: grid;
+        grid-template-columns: 172px 1fr;
+        gap: 26px;
+        align-items: center;
+        min-height: 290px;
+        padding: 30px;
+        background: var(--texto);
+        color: #fff;
+      }
+
+      .grafico-percentual {
+        --percentual: 0;
+        display: grid;
+        width: 168px;
+        height: 168px;
+        place-items: center;
+        border-radius: 50%;
+        background: conic-gradient(var(--amarelo) calc(var(--percentual) * 1%), rgba(255, 255, 255, 0.13) 0);
+      }
+
+      .grafico-percentual::before {
+        grid-area: 1 / 1;
+        width: 124px;
+        height: 124px;
+        border-radius: 50%;
+        background: var(--texto);
+        content: "";
+      }
+
+      .valor-grafico {
+        z-index: 1;
+        grid-area: 1 / 1;
+        text-align: center;
+      }
+
+      .valor-grafico strong {
+        display: block;
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: 39px;
+        font-weight: 500;
+        letter-spacing: -0.05em;
+      }
+
+      .valor-grafico span {
+        color: #b8ccca;
+        font-size: 11px;
+        font-weight: 750;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .texto-resultado .rotulo-resultado {
+        margin-bottom: 10px;
+        color: #8fc3bf;
+        font-size: 11px;
+        font-weight: 850;
+        letter-spacing: 0.13em;
+        text-transform: uppercase;
+      }
+
+      .texto-resultado h2 {
+        margin-bottom: 12px;
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: 27px;
+        font-weight: 500;
+        line-height: 1.14;
+      }
+
+      .texto-resultado p {
+        margin: 0;
+        color: #c6d5d3;
+        font-size: 14px;
+        line-height: 1.55;
+      }
+
+      .grade-indicadores {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      .indicador {
+        min-height: 139px;
+        padding: 22px;
+      }
+
+      .titulo-indicador {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        color: var(--texto-suave);
+        font-size: 12px;
+        font-weight: 750;
+      }
+
+      .bolinha {
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        background: var(--verde);
+      }
+
+      .indicador.alerta .bolinha {
+        background: var(--vermelho);
+      }
+
+      .indicador.neutro .bolinha {
+        background: #8b9a9b;
+      }
+
+      .indicador.destaque .bolinha {
+        background: var(--amarelo);
+      }
+
+      .valor-indicador {
+        display: block;
+        margin: 12px 0 3px;
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: 38px;
+        letter-spacing: -0.045em;
+      }
+
+      .descricao-indicador {
+        color: var(--texto-suave);
+        font-size: 12px;
+      }
+
+      .resumo {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        margin-bottom: 18px;
+        border: 1px solid #ebd2a8;
+        border-radius: 16px;
+        background: var(--amarelo-claro);
+        padding: 15px 18px;
+        color: #6c4819;
+      }
+
+      .simbolo-resumo {
+        display: grid;
+        flex: 0 0 auto;
+        width: 32px;
+        height: 32px;
+        place-items: center;
+        border-radius: 50%;
+        background: #fff7e8;
+        font-weight: 900;
+      }
+
+      .resumo p {
+        margin: 0;
+        font-size: 13px;
+        line-height: 1.5;
+      }
+
+      .grade-conteudo {
+        display: grid;
+        grid-template-columns: minmax(0, 1.25fr) minmax(330px, 0.75fr);
+        gap: 18px;
+        margin-bottom: 18px;
+      }
+
+      .cartao-composicao {
+        margin-bottom: 18px;
+        padding: 22px 24px;
+      }
+
+      .grade-composicao {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      .item-composicao {
+        border-left: 3px solid var(--verde);
+        border-radius: 0 12px 12px 0;
+        background: #f3f6f2;
+        padding: 13px 14px;
+      }
+
+      .item-composicao:nth-child(2) {
+        border-left-color: var(--amarelo);
+      }
+
+      .item-composicao:nth-child(3) {
+        border-left-color: var(--vermelho);
+      }
+
+      .item-composicao:nth-child(4) {
+        border-left-color: #7d8b8d;
+      }
+
+      .item-composicao strong {
+        display: block;
+        margin-bottom: 3px;
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: 25px;
+        font-weight: 500;
+      }
+
+      .item-composicao span {
+        color: var(--texto-suave);
+        font-size: 11px;
+        line-height: 1.4;
+      }
+
+      .cartao-secao {
+        padding: 24px;
+      }
+
+      .cabecalho-secao {
+        display: flex;
+        align-items: start;
+        justify-content: space-between;
+        gap: 18px;
+        margin-bottom: 20px;
+      }
+
+      .cabecalho-secao h2 {
+        margin-bottom: 5px;
+        font-size: 20px;
+        letter-spacing: -0.025em;
+      }
+
+      .cabecalho-secao p {
+        margin: 0;
+        color: var(--texto-suave);
+        font-size: 12px;
+        line-height: 1.45;
+      }
+
+      .etiqueta {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 26px;
+        border-radius: 999px;
+        padding: 4px 9px;
+        background: var(--verde-claro);
+        color: var(--verde-escuro);
+        font-size: 10px;
+        font-weight: 850;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        white-space: nowrap;
+      }
+
+      .etiqueta.heuristica {
+        background: var(--amarelo-claro);
+        color: #80510f;
+      }
+
+      .etiqueta.positivo {
+        background: var(--vermelho-claro);
+        color: #8c382e;
+      }
+
+      .etiqueta.negativo {
+        background: var(--sucesso-claro);
+        color: #2d624c;
+      }
+
+      .lista-ranking,
+      .lista-servicos {
+        display: grid;
+        gap: 14px;
+      }
+
+      .linha-ranking {
+        display: grid;
+        grid-template-columns: minmax(150px, 1.25fr) minmax(140px, 1fr) 96px;
+        gap: 14px;
+        align-items: center;
+      }
+
+      .nome-ranking {
+        min-width: 0;
+      }
+
+      .nome-ranking strong {
+        display: block;
+        overflow: hidden;
+        margin-bottom: 5px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-size: 14px;
+      }
+
+      .nome-ranking span {
+        color: var(--texto-suave);
+        font-size: 11px;
+      }
+
+      .fundo-barra {
+        overflow: hidden;
+        height: 9px;
+        border-radius: 99px;
+        background: #e7ebe7;
+      }
+
+      .barra {
+        width: 0;
+        height: 100%;
+        border-radius: inherit;
+        background: linear-gradient(90deg, var(--verde), #4b9994);
+      }
+
+      .valor-ranking {
+        text-align: right;
+      }
+
+      .valor-ranking strong {
+        display: block;
+        font-size: 14px;
+      }
+
+      .valor-ranking span {
+        color: var(--texto-suave);
+        font-size: 11px;
+      }
+
+      .linha-servico {
+        display: grid;
+        gap: 7px;
+      }
+
+      .nome-servico {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        font-size: 13px;
+      }
+
+      .nome-servico strong {
+        font-size: 12px;
+      }
+
+      .linha-servico .barra {
+        background: linear-gradient(90deg, var(--amarelo), #edb45d);
+      }
+
+      .cartao-tabela {
+        overflow: hidden;
+        margin-bottom: 18px;
+      }
+
+      .cartao-tabela .cabecalho-secao {
+        padding: 24px 24px 0;
+      }
+
+      .tabela-responsiva {
+        overflow-x: auto;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 12px;
+      }
+
+      th,
+      td {
+        border-top: 1px solid #e7e9e4;
+        padding: 14px 16px;
+        text-align: left;
+        vertical-align: top;
+      }
+
+      th {
+        background: #f5f5ef;
+        color: var(--texto-suave);
+        font-size: 10px;
+        font-weight: 850;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      tbody tr:hover {
+        background: rgba(220, 235, 234, 0.24);
+      }
+
+      .coluna-arquivo {
+        max-width: 280px;
+      }
+
+      .coluna-arquivo strong {
+        display: block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .coluna-arquivo span {
+        display: block;
+        margin-top: 4px;
+        color: var(--texto-suave);
+      }
+
+      .lista-etiquetas {
+        display: flex;
+        max-width: 570px;
+        gap: 5px;
+        flex-wrap: wrap;
+      }
+
+      .etiqueta-site {
+        display: inline-flex;
+        max-width: 190px;
+        overflow: hidden;
+        border: 1px solid #dce3df;
+        border-radius: 999px;
+        background: #f7f8f4;
+        padding: 4px 8px;
+        color: #42585b;
+        font-size: 10px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .vazio {
+        padding: 32px;
+        color: var(--texto-suave);
+        text-align: center;
+      }
+
+      .grade-metodo {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 18px;
+      }
+
+      .cartao-metodo {
+        padding: 22px;
+      }
+
+      .numero-metodo {
+        display: grid;
+        width: 34px;
+        height: 34px;
+        place-items: center;
+        margin-bottom: 18px;
+        border-radius: 11px;
+        background: var(--verde-claro);
+        color: var(--verde-escuro);
+        font-weight: 900;
+      }
+
+      .cartao-metodo h3 {
+        margin-bottom: 8px;
+        font-size: 15px;
+      }
+
+      .cartao-metodo p {
+        margin: 0;
+        color: var(--texto-suave);
+        font-size: 12px;
+        line-height: 1.55;
+      }
+
+      .lista-qualidade {
+        display: grid;
+        gap: 8px;
+        margin-top: 14px;
+      }
+
+      .item-qualidade {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        border-top: 1px solid #e8e9e4;
+        padding-top: 10px;
+        color: var(--texto-suave);
+        font-size: 12px;
+      }
+
+      .item-qualidade strong {
+        color: var(--texto);
+      }
+
+      .lista-invalidos {
+        max-height: 120px;
+        overflow: auto;
+        margin: 10px 0 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      .lista-invalidos li {
+        overflow: hidden;
+        padding: 4px 0;
+        color: #8c382e;
+        font-size: 11px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .cabecalho-impressao {
+        display: none;
+      }
+
+      .aviso {
+        position: fixed;
+        right: 22px;
+        bottom: 22px;
+        z-index: 20;
+        max-width: min(420px, calc(100% - 44px));
+        border-radius: 14px;
+        background: var(--texto);
+        color: #fff;
+        box-shadow: var(--sombra);
+        padding: 13px 16px;
+        opacity: 0;
+        transform: translateY(12px);
+        pointer-events: none;
+        transition: opacity 180ms ease, transform 180ms ease;
+        font-size: 13px;
+      }
+
+      .aviso.visivel {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      footer {
+        padding: 0 0 34px;
+        color: var(--texto-suave);
+        font-size: 11px;
+        text-align: center;
+      }
+
+      @media (max-width: 1020px) {
+        .inicio,
+        .grade-resultado,
+        .grade-conteudo {
+          grid-template-columns: 1fr;
+        }
+
+        .inicio {
+          min-height: auto;
+          padding-top: 54px;
+        }
+
+        .cabecalho-painel {
+          align-items: start;
+          flex-direction: column;
+        }
+      }
+
+      @media (max-width: 700px) {
+        .limite {
+          width: min(100% - 24px, 1440px);
+        }
+
+        .barra-topo {
+          align-items: start;
+          padding: 16px 0;
+        }
+
+        .acoes-topo {
+          justify-content: end;
+        }
+
+        .acoes-topo .botao-secundario span:last-child {
+          display: none;
+        }
+
+        h1 {
+          font-size: clamp(43px, 14vw, 66px);
+        }
+
+        .inicio {
+          gap: 30px;
+          padding: 34px 0 64px;
+        }
+
+        .caixa-arquivos {
+          padding: 12px;
+        }
+
+        .area-arquivos {
+          min-height: 300px;
+          padding: 26px 18px;
+        }
+
+        .recursos,
+        .grade-metodo,
+        .grade-indicadores,
+        .grade-composicao {
+          grid-template-columns: 1fr;
+        }
+
+        .cartao-resultado {
+          grid-template-columns: 1fr;
+          justify-items: center;
+          text-align: center;
+        }
+
+        .linha-ranking {
+          grid-template-columns: minmax(130px, 1fr) 74px;
+        }
+
+        .linha-ranking .fundo-barra {
+          display: none;
+        }
+
+        .filtros,
+        .campo,
+        .campo select,
+        .campo input {
+          width: 100%;
+        }
+
+        .acoes-filtros {
+          width: 100%;
+        }
+
+        .acoes-filtros .botao {
+          flex: 1;
+        }
+      }
+
+      @media print {
+        @page {
+          size: A4 landscape;
+          margin: 10mm;
+        }
+
+        :root {
+          --sombra: none;
+        }
+
+        body {
+          background: #fff;
+          color: #14282b;
+          -webkit-print-color-adjust: exact;
+          print-color-adjust: exact;
+        }
+
+        .somente-tela,
+        .barra-topo,
+        footer,
+        .filtros,
+        .aviso {
+          display: none !important;
+        }
+
+        .limite {
+          width: 100%;
+        }
+
+        .painel {
+          padding: 0;
+        }
+
+        .cabecalho-impressao {
+          display: flex;
+          align-items: end;
+          justify-content: space-between;
+          gap: 20px;
+          margin-bottom: 8mm;
+          border-bottom: 2px solid #14282b;
+          padding-bottom: 4mm;
+        }
+
+        .cabecalho-impressao h1 {
+          margin: 0 0 2mm;
+          font-size: 26pt;
+        }
+
+        .cabecalho-impressao p {
+          margin: 0;
+          color: #607477;
+          font-size: 9pt;
+        }
+
+        .cabecalho-painel {
+          display: none;
+        }
+
+        .cartao {
+          box-shadow: none;
+        }
+
+        .grade-resultado {
+          grid-template-columns: 1fr 1.4fr;
+        }
+
+        .grade-conteudo {
+          grid-template-columns: 1.25fr 0.75fr;
+        }
+
+        .cartao-resultado {
+          min-height: 0;
+        }
+
+        .cartao-secao,
+        .indicador,
+        .cartao-metodo,
+        .cartao-resultado {
+          padding: 16px;
+        }
+
+        .tabela-responsiva {
+          overflow: visible;
+        }
+
+        table {
+          font-size: 8pt;
+        }
+
+        th,
+        td {
+          padding: 7px 8px;
+        }
+
+        tr {
+          break-inside: avoid;
+        }
+
+        .grade-metodo {
+          grid-template-columns: repeat(3, 1fr);
+        }
+
+        .grade-composicao {
+          grid-template-columns: repeat(4, 1fr);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <input id="seletorPasta" type="file" accept=".json,application/json" webkitdirectory directory multiple hidden />
+
+    <header class="limite barra-topo somente-tela">
+      <div class="marca">
+        <div class="simbolo-marca">R</div>
+        <div class="texto-marca">
+          <span class="nome-marca">Radar de Sessões</span>
+        </div>
+      </div>
+      <div class="acoes-topo">
+        <button id="botaoTrocarPasta" class="botao botao-secundario escondido" type="button">
+          <span class="icone">↻</span>
+          <span>Trocar pasta</span>
+        </button>
+        <button id="botaoExportar" class="botao botao-principal escondido" type="button" disabled>
+          <span class="icone">↓</span>
+          <span>Exportar PDF completo</span>
+        </button>
+      </div>
+    </header>
+
+    <main class="limite">
+      <section id="telaInicial" class="inicio somente-tela">
+        <div>
+          <div class="rotulo">Diagnóstico consolidado</div>
+          <h1>Análise das informações coletadas.</h1>
+          <p class="texto-inicio">
+            Visualize o percentual de computadores com evidência de sessão persistente, enxergue os sites envolvidos e gere um relatório completo.
+          </p>
+          <div class="acoes-inicio">
+            <button id="botaoEscolherPasta" class="botao botao-principal" type="button">
+              <span class="icone">＋</span>
+              <span>Escolher pasta de relatórios</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="caixa-arquivos">
+          <div id="areaArquivos" class="area-arquivos" tabindex="0" role="button" aria-label="Escolher uma pasta ou soltar arquivos JSON">
+            <div>
+              <div class="simbolo-pasta">▰</div>
+              <h2 class="titulo-pasta">Selecione uma pasta</h2>
+              <p class="texto-pasta">Escolha a pasta que reúne os relatórios JSON ou solte os arquivos diretamente nesta área.</p>
+              <button id="botaoAbrirSeletor" class="botao botao-secundario" type="button">Abrir seletor</button>
+            </div>
+          </div>
+          <div class="recursos">
+            <div class="recurso"><strong>1 arquivo</strong><span>= 1 computador</span></div>
+            <div class="recurso"><strong>JSON local</strong><span>sem upload</span></div>
+            <div class="recurso"><strong>PDF</strong><span>pronto para exportar</span></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="painel" class="painel escondido" aria-live="polite">
+        <div class="cabecalho-impressao">
+          <div>
+            <h1>Radar de Sessões Persistentes</h1>
+            <p id="escopoImpressao">Relatório consolidado</p>
+          </div>
+          <p id="dataImpressao"></p>
+        </div>
+
+        <div class="cabecalho-painel">
+          <div>
+            <div class="rotulo">Resultado consolidado</div>
+            <h1>Panorama dos computadores</h1>
+            <p id="resumoPasta" class="resumo-pasta"></p>
+          </div>
+          <div class="filtros somente-tela">
+            <div class="campo">
+              <label for="filtroPeriodo">Período</label>
+              <select id="filtroPeriodo"><option value="todos">Período completo</option></select>
+            </div>
+            <div class="campo">
+              <label for="filtroSituacao">Situação</label>
+              <select id="filtroSituacao">
+                <option value="todos">Todos os computadores</option>
+                <option value="positivo">Com evidência de sessão</option>
+                <option value="negativo">Sem evidência de sessão</option>
+              </select>
+            </div>
+            <div class="acoes-filtros">
+              <button id="botaoLimparFiltros" class="botao botao-link" type="button">Limpar filtros</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="grade-resultado">
+          <article class="cartao cartao-resultado">
+            <div id="graficoPercentual" class="grafico-percentual">
+              <div class="valor-grafico">
+                <strong id="valorPercentual">0%</strong>
+                <span>dos computadores</span>
+              </div>
+            </div>
+            <div class="texto-resultado">
+              <div class="rotulo-resultado">Resultado inicial</div>
+              <h2 id="textoResultado">Aguardando dados</h2>
+              <p id="descricaoResultado">Selecione uma pasta para consolidar os relatórios.</p>
+            </div>
+          </article>
+
+          <div class="grade-indicadores">
+            <article class="cartao indicador">
+              <div class="titulo-indicador"><span>Computadores analisados</span><span class="bolinha"></span></div>
+              <strong id="totalComputadores" class="valor-indicador">0</strong>
+              <span class="descricao-indicador">arquivos válidos no recorte</span>
+            </article>
+            <article class="cartao indicador alerta">
+              <div class="titulo-indicador"><span>Com evidência de alguma sessão</span><span class="bolinha"></span></div>
+              <strong id="computadoresComEvidencia" class="valor-indicador">0</strong>
+              <span class="descricao-indicador">serviço autenticado ou autenticação provável</span>
+            </article>
+            <article class="cartao indicador neutro">
+              <div class="titulo-indicador"><span>Sem evidência de sessão</span><span class="bolinha"></span></div>
+              <strong id="computadoresSemEvidencia" class="valor-indicador">0</strong>
+              <span class="descricao-indicador">nenhum serviço ou site sinalizado</span>
+            </article>
+            <article class="cartao indicador destaque">
+              <div class="titulo-indicador"><span>Sites identificados</span><span class="bolinha"></span></div>
+              <strong id="totalSites" class="valor-indicador">0</strong>
+              <span class="descricao-indicador">serviços e domínios distintos</span>
+            </article>
+          </div>
+        </div>
+
+        <div class="resumo">
+          <div class="simbolo-resumo">i</div>
+          <p id="textoResumo">O resultado combina serviços autenticados e sites marcados com autenticação provável.</p>
+        </div>
+
+        <article class="cartao cartao-composicao">
+          <div class="cabecalho-secao">
+            <div>
+              <h2>Composição dos sinais de sessão</h2>
+              <p>Participação dos sinais diretos e da autenticação provável no resultado.</p>
+            </div>
+          </div>
+          <div class="grade-composicao">
+            <div class="item-composicao"><strong id="computadoresSinalDireto">0</strong><span>computadores com serviço monitorado autenticado</span></div>
+            <div class="item-composicao"><strong id="computadoresSinalProvavel">0</strong><span>computadores com autenticação provável</span></div>
+            <div class="item-composicao"><strong id="somenteSinalProvavel">0</strong><span>computadores positivos somente pela heurística</span></div>
+            <div class="item-composicao"><strong id="computadoresSinaisCombinados">0</strong><span>computadores com os dois tipos de sinal</span></div>
+          </div>
+        </article>
+
+        <div class="grade-conteudo">
+          <article class="cartao cartao-secao">
+            <div class="cabecalho-secao">
+              <div>
+                <h2>Sites com evidência de sessão</h2>
+                <p>Sites e serviços ordenados pela quantidade de computadores.</p>
+              </div>
+              <div class="campo somente-tela">
+                <label for="buscaSite">Localizar site</label>
+                <input id="buscaSite" type="search" placeholder="Ex.: Google ou domínio" />
+              </div>
+            </div>
+            <div id="rankingSites" class="lista-ranking"></div>
+          </article>
+
+          <article class="cartao cartao-secao">
+            <div class="cabecalho-secao">
+              <div>
+                <h2>Serviços monitorados</h2>
+                <p>Autenticação detectada nos dez serviços fixos.</p>
+              </div>
+              <span class="etiqueta">Sinal direto</span>
+            </div>
+            <div id="rankingServicos" class="lista-servicos"></div>
+          </article>
+        </div>
+
+        <article class="cartao cartao-tabela">
+          <div class="cabecalho-secao">
+            <div>
+              <h2>Detalhamento por computador</h2>
+              <p>Cada arquivo válido é contabilizado como um computador independente.</p>
+            </div>
+            <span id="quantidadeComputadores" class="etiqueta">0 computadores</span>
+          </div>
+          <div class="tabela-responsiva">
+            <table>
+              <thead>
+                <tr>
+                  <th>Computador / arquivo</th>
+                  <th>Período</th>
+                  <th>Resultado</th>
+                  <th>Sites com evidência</th>
+                  <th>Sinais</th>
+                </tr>
+              </thead>
+              <tbody id="linhasComputadores"></tbody>
+            </table>
+          </div>
+        </article>
+
+        <div class="grade-metodo">
+          <article class="cartao cartao-metodo">
+            <div class="numero-metodo">01</div>
+            <h3>Critério do percentual</h3>
+            <p>Um computador entra no numerador quando ao menos um serviço fixo está autenticado ou quando um site possui <strong>autenticacao_provavel = true</strong>. O denominador considera somente relatórios válidos no filtro atual.</p>
+          </article>
+          <article class="cartao cartao-metodo">
+            <div class="numero-metodo">02</div>
+            <h3>Leitura dos sites</h3>
+            <p>Serviços fixos e domínios encontrados pela heurística são exibidos separadamente. O mesmo site conta apenas uma vez por computador em cada origem.</p>
+          </article>
+          <article class="cartao cartao-metodo">
+            <div class="numero-metodo">03</div>
+            <h3>Qualidade e limitações</h3>
+            <div id="listaQualidade" class="lista-qualidade"></div>
+            <ul id="listaInvalidos" class="lista-invalidos"></ul>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <footer class="somente-tela">Radar de Sessões Persistentes · análise local no navegador</footer>
+    <div id="aviso" class="aviso" role="status" aria-live="polite"></div>
+    <div id="telaProcessando" class="tela-processando escondido somente-tela" role="status" aria-live="assertive">
+      <div class="caixa-processando">
+        <span class="carregando"></span>
+        <strong>Processando relatórios</strong>
+        <span id="textoProcessando">Organizando as informações coletadas...</span>
+      </div>
+    </div>
+
+    <script>
+      const SERVICOS_FIXOS = [
+        { chave: "google_autenticado", chaveAntiga: "google_auth_autenticado", nome: "Google", dominio: "google.com" },
+        { chave: "whatsapp_web_autenticado", chaveAntiga: "whatsapp_web_auth_autenticado", nome: "WhatsApp Web", dominio: "web.whatsapp.com" },
+        { chave: "microsoft_autenticado", chaveAntiga: "microsoft_auth_autenticado", nome: "Microsoft", dominio: "microsoft.com" },
+        { chave: "instagram_autenticado", chaveAntiga: "instagram_auth_autenticado", nome: "Instagram", dominio: "instagram.com" },
+        { chave: "facebook_autenticado", chaveAntiga: "facebook_auth_autenticado", nome: "Facebook", dominio: "facebook.com" },
+        { chave: "github_autenticado", chaveAntiga: "github_auth_autenticado", nome: "GitHub", dominio: "github.com" },
+        { chave: "aws_autenticado", chaveAntiga: "aws_auth_autenticado", nome: "AWS", dominio: "aws.amazon.com" },
+        { chave: "linkedin_autenticado", chaveAntiga: "linkedin_auth_autenticado", nome: "LinkedIn", dominio: "linkedin.com" },
+        { chave: "x_twitter_autenticado", chaveAntiga: "x_twitter_auth_autenticado", nome: "X / Twitter", dominio: "x.com" },
+        { chave: "slack_autenticado", chaveAntiga: "slack_auth_autenticado", nome: "Slack", dominio: "slack.com" }
+      ];
+
+      const estado = {
+        computadores: [],
+        arquivosInvalidos: [],
+        nomePasta: "",
+        periodo: "todos",
+        situacao: "todos",
+        buscaSite: ""
+      };
+
+      const seletorPasta = document.getElementById("seletorPasta");
+      const telaInicial = document.getElementById("telaInicial");
+      const painel = document.getElementById("painel");
+      const areaArquivos = document.getElementById("areaArquivos");
+      const telaProcessando = document.getElementById("telaProcessando");
+      const textoProcessando = document.getElementById("textoProcessando");
+      const botaoExportar = document.getElementById("botaoExportar");
+      const botaoTrocarPasta = document.getElementById("botaoTrocarPasta");
+      const filtroPeriodo = document.getElementById("filtroPeriodo");
+      const filtroSituacao = document.getElementById("filtroSituacao");
+      const buscaSite = document.getElementById("buscaSite");
+      const aviso = document.getElementById("aviso");
+      const formatoNumero = new Intl.NumberFormat("pt-BR");
+      const formatoPercentual = new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 1, minimumFractionDigits: 0 });
+
+      function escaparHtml(valor) {
+        return String(valor ?? "")
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;")
+          .replaceAll('"', "&quot;")
+          .replaceAll("'", "&#039;");
+      }
+
+      function normalizarDominio(valor) {
+        return String(valor || "")
+          .trim()
+          .toLowerCase()
+          .replace(/^https?:\/\//, "")
+          .replace(/^www\./, "")
+          .split("/")[0];
+      }
+
+      function descobrirPeriodo(relatorio, nomeArquivo) {
+        const periodoInformado = relatorio?.metadados?.periodo_geracao;
+        if (/^\d{4}-\d{2}$/.test(periodoInformado || "")) {
+          return periodoInformado;
+        }
+
+        const dataGeracao = relatorio?._meta?.generated_at;
+        if (/^\d{4}-\d{2}/.test(dataGeracao || "")) {
+          return dataGeracao.slice(0, 7);
+        }
+
+        const periodoNoNome = String(nomeArquivo).match(/relatorio(?:-sessoes)?-(\d{4})-(\d{2})/i);
+        return periodoNoNome ? `${periodoNoNome[1]}-${periodoNoNome[2]}` : "Não informado";
+      }
+
+      function pegarSitesProvaveis(relatorio) {
+        const sitesAtuais = relatorio?.sites_descobertos?.sites;
+        const sitesAntigos = relatorio?._sites_descobertos_historico?.domains;
+        const sites = Array.isArray(sitesAtuais) ? sitesAtuais : Array.isArray(sitesAntigos) ? sitesAntigos : [];
+        const sitesSemRepeticao = new Map();
+
+        for (const site of sites) {
+          const autenticacaoProvavel = site?.autenticacao_provavel ?? site?.probableAuthenticated;
+          if (autenticacaoProvavel !== true) {
+            continue;
+          }
+
+          const dominio = normalizarDominio(site?.dominio ?? site?.domain);
+          if (!dominio) {
+            continue;
+          }
+
+          const confianca = String(site?.confianca ?? site?.confidence ?? "não informada").toLowerCase();
+          sitesSemRepeticao.set(dominio, {
+            id: `provavel:${dominio}`,
+            nome: dominio,
+            dominio,
+            origem: "provavel",
+            confianca
+          });
+        }
+
+        return Array.from(sitesSemRepeticao.values());
+      }
+
+      function lerRelatorio(relatorio, nomeArquivo, caminhoArquivo = "") {
+        if (!relatorio || typeof relatorio !== "object" || Array.isArray(relatorio)) {
+          throw new Error("conteúdo JSON não é um objeto");
+        }
+
+        const estruturaConhecida = SERVICOS_FIXOS.some((servico) => typeof relatorio[servico.chave] === "boolean" || typeof relatorio[servico.chaveAntiga] === "boolean") || relatorio.sites_descobertos || relatorio._sites_descobertos_historico;
+        if (!estruturaConhecida) {
+          throw new Error("estrutura de relatório não reconhecida");
+        }
+
+        const evidenciasFixas = SERVICOS_FIXOS.filter((servico) => {
+          const autenticado = typeof relatorio[servico.chave] === "boolean" ? relatorio[servico.chave] : relatorio[servico.chaveAntiga];
+          return autenticado === true;
+        }).map((servico) => ({
+          id: `fixo:${servico.chave}`,
+          nome: servico.nome,
+          dominio: servico.dominio,
+          origem: "fixa",
+          confianca: "direta"
+        }));
+
+        const evidenciasProvaveis = pegarSitesProvaveis(relatorio);
+        const mapaEvidencias = new Map([...evidenciasFixas, ...evidenciasProvaveis].map((item) => [item.id, item]));
+        const evidencias = Array.from(mapaEvidencias.values());
+
+        return {
+          nomeArquivo,
+          caminhoArquivo,
+          periodo: descobrirPeriodo(relatorio, nomeArquivo),
+          evidenciasFixas,
+          evidenciasProvaveis,
+          evidencias,
+          temEvidencia: evidencias.length > 0
+        };
+      }
+
+      function filtrarComputadores() {
+        return estado.computadores.filter((computador) => {
+          const mesmoPeriodo = estado.periodo === "todos" || computador.periodo === estado.periodo;
+          const mesmaSituacao = estado.situacao === "todos" || (estado.situacao === "positivo" ? computador.temEvidencia : !computador.temEvidencia);
+          return mesmoPeriodo && mesmaSituacao;
+        });
+      }
+
+      function montarAnalise(computadores) {
+        const dadosSites = new Map();
+        const dadosServicos = new Map(SERVICOS_FIXOS.map((servico) => [servico.chave, { ...servico, quantidade: 0 }]));
+        let comEvidencia = 0;
+        let computadoresDiretos = 0;
+        let computadoresProvaveis = 0;
+        let apenasProvaveis = 0;
+        let sinaisCombinados = 0;
+
+        for (const computador of computadores) {
+          if (computador.temEvidencia) {
+            comEvidencia += 1;
+          }
+          if (computador.evidenciasFixas.length) {
+            computadoresDiretos += 1;
+          }
+          if (computador.evidenciasProvaveis.length) {
+            computadoresProvaveis += 1;
+          }
+          if (!computador.evidenciasFixas.length && computador.evidenciasProvaveis.length) {
+            apenasProvaveis += 1;
+          }
+          if (computador.evidenciasFixas.length && computador.evidenciasProvaveis.length) {
+            sinaisCombinados += 1;
+          }
+
+          for (const item of computador.evidenciasFixas) {
+            const servico = SERVICOS_FIXOS.find((opcao) => `fixo:${opcao.chave}` === item.id);
+            if (servico) {
+              dadosServicos.get(servico.chave).quantidade += 1;
+            }
+          }
+
+          for (const item of computador.evidencias) {
+            if (!dadosSites.has(item.id)) {
+              dadosSites.set(item.id, { ...item, quantidade: 0, contagemConfianca: new Map() });
+            }
+            const dadoSite = dadosSites.get(item.id);
+            dadoSite.quantidade += 1;
+            dadoSite.contagemConfianca.set(item.confianca, (dadoSite.contagemConfianca.get(item.confianca) || 0) + 1);
+          }
+        }
+
+        const total = computadores.length;
+        const percentual = total ? (comEvidencia / total) * 100 : 0;
+        const sites = Array.from(dadosSites.values()).sort((a, b) => b.quantidade - a.quantidade || a.nome.localeCompare(b.nome, "pt-BR"));
+        const servicos = Array.from(dadosServicos.values()).sort((a, b) => b.quantidade - a.quantidade || a.nome.localeCompare(b.nome, "pt-BR"));
+
+        return {
+          total,
+          comEvidencia,
+          semEvidencia: total - comEvidencia,
+          percentual,
+          computadoresDiretos,
+          computadoresProvaveis,
+          apenasProvaveis,
+          sinaisCombinados,
+          sites,
+          servicos,
+          totalSites: sites.length
+        };
+      }
+
+      function mostrarAviso(mensagem) {
+        aviso.textContent = mensagem;
+        aviso.classList.add("visivel");
+        clearTimeout(mostrarAviso.tempo);
+        mostrarAviso.tempo = setTimeout(() => aviso.classList.remove("visivel"), 3200);
+      }
+
+      function montarTextoResumo(analise) {
+        if (!analise.total) {
+          return "Nenhum computador disponível no recorte atual. Ajuste os filtros para visualizar o resultado.";
+        }
+        if (analise.percentual === 0) {
+          return "Nenhum relatório do recorte apresentou evidência de sessão persistente. O resultado reflete somente os sinais disponíveis no momento da coleta.";
+        }
+        if (analise.percentual < 25) {
+          return "A evidência está concentrada em uma parcela menor dos computadores. Consulte abaixo quais serviços ou sites geraram o resultado.";
+        }
+        if (analise.percentual < 60) {
+          return "A evidência aparece em uma parcela relevante dos computadores. Consulte abaixo quais serviços ou sites geraram o resultado.";
+        }
+        return "O percentual considera computadores com serviço autenticado ou site marcado com autenticação provável. Os rankings abaixo mostram exatamente onde os sinais foram encontrados.";
+      }
+
+      function textoConfianca(dadoSite) {
+        if (dadoSite.origem === "fixa") {
+          return "serviço monitorado";
+        }
+        const itens = Array.from(dadoSite.contagemConfianca.entries()).sort((a, b) => b[1] - a[1]);
+        return itens.length ? `heurística · confiança ${itens[0][0]}` : "heurística";
+      }
+
+      function mostrarRankingSites(analise) {
+        const pesquisa = estado.buscaSite.trim().toLowerCase();
+        const sites = analise.sites.filter((site) => !pesquisa || site.nome.toLowerCase().includes(pesquisa) || site.dominio.toLowerCase().includes(pesquisa));
+        const elemento = document.getElementById("rankingSites");
+
+        if (!sites.length) {
+          elemento.innerHTML = `<div class="vazio">${analise.sites.length ? "Nenhum site corresponde à busca." : "Nenhum site com evidência neste recorte."}</div>`;
+          return;
+        }
+
+        elemento.innerHTML = sites.map((site) => {
+          const percentual = analise.total ? (site.quantidade / analise.total) * 100 : 0;
+          return `
+            <div class="linha-ranking">
+              <div class="nome-ranking">
+                <strong title="${escaparHtml(site.nome)}">${escaparHtml(site.nome)}</strong>
+                <span>${escaparHtml(textoConfianca(site))}</span>
+              </div>
+              <div class="fundo-barra" aria-label="${escaparHtml(site.nome)} em ${formatoPercentual.format(percentual)}% dos computadores">
+                <div class="barra" style="width:${Math.min(100, percentual)}%"></div>
+              </div>
+              <div class="valor-ranking">
+                <strong>${formatoNumero.format(site.quantidade)} computador${site.quantidade === 1 ? "" : "es"}</strong>
+                <span>${formatoPercentual.format(percentual)}%</span>
+              </div>
+            </div>`;
+        }).join("");
+      }
+
+      function mostrarRankingServicos(analise) {
+        const elemento = document.getElementById("rankingServicos");
+        elemento.innerHTML = analise.servicos.map((servico) => {
+          const percentual = analise.total ? (servico.quantidade / analise.total) * 100 : 0;
+          return `
+            <div class="linha-servico">
+              <div class="nome-servico">
+                <span>${escaparHtml(servico.nome)}</span>
+                <strong>${formatoNumero.format(servico.quantidade)} · ${formatoPercentual.format(percentual)}%</strong>
+              </div>
+              <div class="fundo-barra" aria-label="${escaparHtml(servico.nome)} em ${formatoPercentual.format(percentual)}% dos computadores">
+                <div class="barra" style="width:${Math.min(100, percentual)}%"></div>
+              </div>
+            </div>`;
+        }).join("");
+      }
+
+      function mostrarTabelaComputadores(computadores) {
+        const elemento = document.getElementById("linhasComputadores");
+        document.getElementById("quantidadeComputadores").textContent = `${formatoNumero.format(computadores.length)} computador${computadores.length === 1 ? "" : "es"}`;
+
+        if (!computadores.length) {
+          elemento.innerHTML = '<tr><td class="vazio" colspan="5">Nenhum computador corresponde aos filtros selecionados.</td></tr>';
+          return;
+        }
+
+        elemento.innerHTML = computadores.map((computador, indice) => {
+          const sitesVisiveis = computador.evidencias.slice(0, 5);
+          const restantes = computador.evidencias.length - sitesVisiveis.length;
+          const etiquetas = sitesVisiveis.map((site) => `<span class="etiqueta-site" title="${escaparHtml(site.nome)}">${escaparHtml(site.nome)}</span>`).join("");
+          const adicional = restantes > 0 ? `<span class="etiqueta-site">+${restantes} outro${restantes === 1 ? "" : "s"}</span>` : "";
+          return `
+            <tr>
+              <td class="coluna-arquivo">
+                <strong title="${escaparHtml(computador.caminhoArquivo || computador.nomeArquivo)}">Computador ${String(indice + 1).padStart(3, "0")}</strong>
+                <span title="${escaparHtml(computador.caminhoArquivo || computador.nomeArquivo)}">${escaparHtml(computador.nomeArquivo)}</span>
+              </td>
+              <td>${escaparHtml(computador.periodo)}</td>
+              <td><span class="etiqueta ${computador.temEvidencia ? "positivo" : "negativo"}">${computador.temEvidencia ? "Com evidência de sessão" : "Sem evidência de sessão"}</span></td>
+              <td><div class="lista-etiquetas">${etiquetas}${adicional || (!computador.evidencias.length ? '<span class="etiqueta-site">Nenhum</span>' : "")}</div></td>
+              <td>${computador.evidenciasFixas.length} direto${computador.evidenciasFixas.length === 1 ? "" : "s"}<br />${computador.evidenciasProvaveis.length} ${computador.evidenciasProvaveis.length === 1 ? "provável" : "prováveis"}</td>
+            </tr>`;
+        }).join("");
+      }
+
+      function mostrarQualidade() {
+        const periodos = new Set(estado.computadores.map((computador) => computador.periodo));
+        document.getElementById("listaQualidade").innerHTML = `
+          <div class="item-qualidade"><span>Arquivos válidos</span><strong>${formatoNumero.format(estado.computadores.length)}</strong></div>
+          <div class="item-qualidade"><span>Arquivos ignorados</span><strong>${formatoNumero.format(estado.arquivosInvalidos.length)}</strong></div>
+          <div class="item-qualidade"><span>Períodos encontrados</span><strong>${formatoNumero.format(periodos.size)}</strong></div>`;
+
+        const listaInvalidos = document.getElementById("listaInvalidos");
+        listaInvalidos.innerHTML = estado.arquivosInvalidos.map((item) => `<li title="${escaparHtml(item.motivo)}">${escaparHtml(item.nomeArquivo)} · ${escaparHtml(item.motivo)}</li>`).join("");
+      }
+
+      function atualizarPainel() {
+        const computadores = filtrarComputadores();
+        const analise = montarAnalise(computadores);
+        const textoPercentual = `${formatoPercentual.format(analise.percentual)}%`;
+        const partesResumo = [estado.nomePasta, `${estado.computadores.length} arquivo${estado.computadores.length === 1 ? " válido" : "s válidos"}`];
+        if (estado.periodo !== "todos") {
+          partesResumo.push(`período ${estado.periodo}`);
+        }
+        if (estado.situacao === "positivo") {
+          partesResumo.push("somente computadores com evidência");
+        }
+        if (estado.situacao === "negativo") {
+          partesResumo.push("somente computadores sem evidência");
+        }
+        const textoEscopo = partesResumo.join(" · ");
+
+        document.getElementById("graficoPercentual").style.setProperty("--percentual", String(Math.max(0, Math.min(100, analise.percentual))));
+        document.getElementById("valorPercentual").textContent = textoPercentual;
+        document.getElementById("textoResultado").textContent = analise.total ? `${analise.comEvidencia} de ${analise.total} ${analise.total === 1 ? "computador possui" : "computadores possuem"} ao menos um serviço autenticado ou site com autenticação provável.` : "Nenhum computador no recorte.";
+        document.getElementById("descricaoResultado").textContent = "Resultado: percentual inicial de computadores com evidência de sessão persistente.";
+        document.getElementById("totalComputadores").textContent = formatoNumero.format(analise.total);
+        document.getElementById("computadoresComEvidencia").textContent = formatoNumero.format(analise.comEvidencia);
+        document.getElementById("computadoresSemEvidencia").textContent = formatoNumero.format(analise.semEvidencia);
+        document.getElementById("totalSites").textContent = formatoNumero.format(analise.totalSites);
+        document.getElementById("computadoresSinalDireto").textContent = formatoNumero.format(analise.computadoresDiretos);
+        document.getElementById("computadoresSinalProvavel").textContent = formatoNumero.format(analise.computadoresProvaveis);
+        document.getElementById("somenteSinalProvavel").textContent = formatoNumero.format(analise.apenasProvaveis);
+        document.getElementById("computadoresSinaisCombinados").textContent = formatoNumero.format(analise.sinaisCombinados);
+        document.getElementById("textoResumo").textContent = montarTextoResumo(analise);
+        document.getElementById("resumoPasta").textContent = textoEscopo;
+        document.getElementById("escopoImpressao").textContent = textoEscopo;
+        document.getElementById("dataImpressao").textContent = `Gerado em ${new Intl.DateTimeFormat("pt-BR", { dateStyle: "long", timeStyle: "short" }).format(new Date())}`;
+
+        mostrarRankingSites(analise);
+        mostrarRankingServicos(analise);
+        mostrarTabelaComputadores(computadores);
+        mostrarQualidade();
+      }
+
+      function preencherFiltroPeriodo() {
+        const periodos = Array.from(new Set(estado.computadores.map((computador) => computador.periodo))).sort().reverse();
+        filtroPeriodo.innerHTML = '<option value="todos">Período completo</option>' + periodos.map((periodo) => `<option value="${escaparHtml(periodo)}">${escaparHtml(periodo)}</option>`).join("");
+        estado.periodo = "todos";
+        estado.situacao = "todos";
+        estado.buscaSite = "";
+        filtroSituacao.value = "todos";
+        buscaSite.value = "";
+      }
+
+      async function carregarArquivos(listaArquivos) {
+        const arquivos = Array.from(listaArquivos || []).filter((arquivo) => arquivo.name.toLowerCase().endsWith(".json"));
+        if (!arquivos.length) {
+          mostrarAviso("Nenhum arquivo JSON foi encontrado na seleção.");
+          return;
+        }
+
+        const inicioProcessamento = Date.now();
+        textoProcessando.textContent = `Processando ${formatoNumero.format(arquivos.length)} arquivo${arquivos.length === 1 ? "" : "s"} e organizando o painel...`;
+        telaProcessando.classList.remove("escondido");
+        botaoExportar.classList.add("escondido");
+        botaoExportar.disabled = true;
+        botaoTrocarPasta.disabled = true;
+        estado.computadores = [];
+        estado.arquivosInvalidos = [];
+        estado.nomePasta = arquivos[0].webkitRelativePath?.split("/")[0] || "Arquivos selecionados";
+
+        try {
+          await Promise.all(arquivos.map(async (arquivo) => {
+            try {
+              const relatorio = JSON.parse(await arquivo.text());
+              estado.computadores.push(lerRelatorio(relatorio, arquivo.name, arquivo.webkitRelativePath || arquivo.name));
+            } catch (erro) {
+              estado.arquivosInvalidos.push({ nomeArquivo: arquivo.name, motivo: erro?.message || "falha de leitura" });
+            }
+          }));
+
+          const tempoProcessamentoRestante = 4000 - (Date.now() - inicioProcessamento);
+          if (tempoProcessamentoRestante > 0) {
+            await new Promise((finalizar) => setTimeout(finalizar, tempoProcessamentoRestante));
+          }
+
+          estado.computadores.sort((a, b) => a.nomeArquivo.localeCompare(b.nomeArquivo, "pt-BR"));
+          estado.arquivosInvalidos.sort((a, b) => a.nomeArquivo.localeCompare(b.nomeArquivo, "pt-BR"));
+
+          if (!estado.computadores.length) {
+            painel.classList.add("escondido");
+            telaInicial.classList.remove("escondido");
+            botaoTrocarPasta.classList.add("escondido");
+            mostrarAviso("Os arquivos foram lidos, mas nenhum relatório compatível foi encontrado.");
+            return;
+          }
+
+          preencherFiltroPeriodo();
+          telaInicial.classList.add("escondido");
+          painel.classList.remove("escondido");
+          botaoTrocarPasta.classList.remove("escondido");
+          botaoExportar.classList.remove("escondido");
+          botaoExportar.disabled = false;
+          atualizarPainel();
+          window.scrollTo({ top: 0, behavior: "smooth" });
+
+          const textoIgnorados = estado.arquivosInvalidos.length ? ` ${estado.arquivosInvalidos.length} arquivo${estado.arquivosInvalidos.length === 1 ? " foi ignorado" : "s foram ignorados"}.` : "";
+          mostrarAviso(`${estado.computadores.length} relatório${estado.computadores.length === 1 ? " carregado" : "s carregados"}.${textoIgnorados}`);
+        } finally {
+          telaProcessando.classList.add("escondido");
+          botaoTrocarPasta.disabled = false;
+        }
+      }
+
+      function abrirPasta() {
+        seletorPasta.value = "";
+        seletorPasta.click();
+      }
+
+      function exportarPdf() {
+        if (!estado.computadores.length) {
+          return;
+        }
+
+        const filtrosAnteriores = {
+          periodo: estado.periodo,
+          situacao: estado.situacao,
+          buscaSite: estado.buscaSite
+        };
+        const tituloOriginal = document.title;
+        const dataArquivo = new Date().toISOString().slice(0, 10);
+        estado.periodo = "todos";
+        estado.situacao = "todos";
+        estado.buscaSite = "";
+        filtroPeriodo.value = "todos";
+        filtroSituacao.value = "todos";
+        buscaSite.value = "";
+        atualizarPainel();
+        document.title = `relatorio-sessoes-persistentes-${dataArquivo}`;
+        const restaurarTitulo = () => {
+          document.title = tituloOriginal;
+          estado.periodo = filtrosAnteriores.periodo;
+          estado.situacao = filtrosAnteriores.situacao;
+          estado.buscaSite = filtrosAnteriores.buscaSite;
+          filtroPeriodo.value = filtrosAnteriores.periodo;
+          filtroSituacao.value = filtrosAnteriores.situacao;
+          buscaSite.value = filtrosAnteriores.buscaSite;
+          atualizarPainel();
+          window.removeEventListener("afterprint", restaurarTitulo);
+        };
+        window.addEventListener("afterprint", restaurarTitulo);
+        window.print();
+      }
+
+      document.getElementById("botaoEscolherPasta").addEventListener("click", abrirPasta);
+      document.getElementById("botaoAbrirSeletor").addEventListener("click", (evento) => {
+        evento.stopPropagation();
+        abrirPasta();
+      });
+      botaoTrocarPasta.addEventListener("click", abrirPasta);
+      seletorPasta.addEventListener("change", (evento) => carregarArquivos(evento.target.files));
+      botaoExportar.addEventListener("click", exportarPdf);
+
+      areaArquivos.addEventListener("click", abrirPasta);
+      areaArquivos.addEventListener("keydown", (evento) => {
+        if (evento.key === "Enter" || evento.key === " ") {
+          evento.preventDefault();
+          abrirPasta();
+        }
+      });
+
+      for (const nomeEvento of ["dragenter", "dragover"]) {
+        areaArquivos.addEventListener(nomeEvento, (evento) => {
+          evento.preventDefault();
+          areaArquivos.classList.add("arrastando");
+        });
+      }
+
+      for (const nomeEvento of ["dragleave", "drop"]) {
+        areaArquivos.addEventListener(nomeEvento, (evento) => {
+          evento.preventDefault();
+          areaArquivos.classList.remove("arrastando");
+        });
+      }
+
+      areaArquivos.addEventListener("drop", (evento) => carregarArquivos(evento.dataTransfer.files));
+
+      filtroPeriodo.addEventListener("change", () => {
+        estado.periodo = filtroPeriodo.value;
+        atualizarPainel();
+      });
+
+      filtroSituacao.addEventListener("change", () => {
+        estado.situacao = filtroSituacao.value;
+        atualizarPainel();
+      });
+
+      buscaSite.addEventListener("input", () => {
+        estado.buscaSite = buscaSite.value;
+        mostrarRankingSites(montarAnalise(filtrarComputadores()));
+      });
+
+      document.getElementById("botaoLimparFiltros").addEventListener("click", () => {
+        estado.periodo = "todos";
+        estado.situacao = "todos";
+        estado.buscaSite = "";
+        filtroPeriodo.value = "todos";
+        filtroSituacao.value = "todos";
+        buscaSite.value = "";
+        atualizarPainel();
+      });
+    </script>
+  </body>
+</html>
