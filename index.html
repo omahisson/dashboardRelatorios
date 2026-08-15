@@ -1303,7 +1303,7 @@
             <article class="cartao indicador alerta">
               <div class="titulo-indicador"><span>Persistência de sessão confirmada</span><span class="bolinha"></span></div>
               <strong id="computadoresPsConfirmada" class="valor-indicador">0</strong>
-              <span class="descricao-indicador">sessão autenticada detectada</span>
+              <span class="descricao-indicador">sessão autenticada detectada em pelo menos um site</span>
             </article>
             <article class="cartao indicador destaque">
               <div class="titulo-indicador"><span>Computadores com apenas indício de persistência de sessão</span><span class="bolinha"></span></div>
@@ -1338,33 +1338,6 @@
           </div>
         </article>
 
-        <div class="grade-conteudo">
-          <article class="cartao cartao-secao">
-            <div class="cabecalho-secao">
-              <div>
-                <h2>Sites e serviços sinalizados</h2>
-                <p>Evidências diretas e heurísticas exibidas sem tratá-las como equivalentes.</p>
-              </div>
-              <div class="campo somente-tela">
-                <label for="buscaSite">Localizar site</label>
-                <input id="buscaSite" type="search" placeholder="Ex.: Google ou domínio" />
-              </div>
-            </div>
-            <div id="rankingSites" class="lista-ranking"></div>
-          </article>
-
-          <article class="cartao cartao-secao">
-            <div class="cabecalho-secao">
-              <div>
-                <h2>Serviços monitorados</h2>
-                <p>Autenticação detectada nos dez serviços fixos.</p>
-              </div>
-              <span class="etiqueta">Sinal direto</span>
-            </div>
-            <div id="rankingServicos" class="lista-servicos"></div>
-          </article>
-        </div>
-
         <article class="cartao cartao-tabela">
           <div class="cabecalho-secao">
             <div>
@@ -1388,6 +1361,33 @@
             </table>
           </div>
         </article>
+
+        <div class="grade-conteudo">
+          <article class="cartao cartao-secao">
+            <div class="cabecalho-secao">
+              <div>
+                <h2>Sites e serviços sinalizados</h2>
+                <p>Evidências diretas e heurísticas exibidas.</p>
+              </div>
+              <div class="campo somente-tela">
+                <label for="buscaSite">Localizar site</label>
+                <input id="buscaSite" type="search" placeholder="Ex.: Google ou domínio" />
+              </div>
+            </div>
+            <div id="rankingSites" class="lista-ranking"></div>
+          </article>
+
+          <article class="cartao cartao-secao">
+            <div class="cabecalho-secao">
+              <div>
+                <h2>Serviços monitorados</h2>
+                <p>Autenticação detectada nos dez serviços fixos.</p>
+              </div>
+              <span class="etiqueta">Sinal direto</span>
+            </div>
+            <div id="rankingServicos" class="lista-servicos"></div>
+          </article>
+        </div>
 
         <div class="grade-metodo">
           <article class="cartao cartao-metodo">
