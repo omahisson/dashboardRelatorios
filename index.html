@@ -1217,7 +1217,7 @@
           <div class="rotulo">Diagnóstico consolidado</div>
           <h1>Análise das informações coletadas.</h1>
           <p class="texto-inicio">
-            Visualize o percentual de computadores com evidência de sessão persistente, enxergue os sites envolvidos e gere um relatório completo.
+            Visualize separadamente PS-confirmada, PS-indício e computadores sem evidência, identifique os sites envolvidos e gere um relatório completo.
           </p>
           <div class="acoes-inicio">
             <button id="botaoEscolherPasta" class="botao botao-principal" type="button">
@@ -1268,8 +1268,9 @@
               <label for="filtroSituacao">Situação</label>
               <select id="filtroSituacao">
                 <option value="todos">Todos os computadores</option>
-                <option value="positivo">Com evidência de sessão</option>
-                <option value="negativo">Sem evidência de sessão</option>
+                <option value="confirmada">PS-confirmada</option>
+                <option value="indicio">PS-indício</option>
+                <option value="sem-evidencia">Sem evidência</option>
               </select>
             </div>
             <div class="acoes-filtros">
@@ -1287,7 +1288,7 @@
               </div>
             </div>
             <div class="texto-resultado">
-              <div class="rotulo-resultado">Resultado inicial</div>
+              <div class="rotulo-resultado">PS-confirmada</div>
               <h2 id="textoResultado">Aguardando dados</h2>
               <p id="descricaoResultado">Selecione uma pasta para consolidar os relatórios.</p>
             </div>
@@ -1300,40 +1301,40 @@
               <span class="descricao-indicador">arquivos válidos no recorte</span>
             </article>
             <article class="cartao indicador alerta">
-              <div class="titulo-indicador"><span>Com evidência de alguma sessão</span><span class="bolinha"></span></div>
-              <strong id="computadoresComEvidencia" class="valor-indicador">0</strong>
-              <span class="descricao-indicador">serviço autenticado ou autenticação provável</span>
-            </article>
-            <article class="cartao indicador neutro">
-              <div class="titulo-indicador"><span>Sem evidência de sessão</span><span class="bolinha"></span></div>
-              <strong id="computadoresSemEvidencia" class="valor-indicador">0</strong>
-              <span class="descricao-indicador">nenhum serviço ou site sinalizado</span>
+              <div class="titulo-indicador"><span>PS-confirmada</span><span class="bolinha"></span></div>
+              <strong id="computadoresPsConfirmada" class="valor-indicador">0</strong>
+              <span class="descricao-indicador">sessão autenticada detectada</span>
             </article>
             <article class="cartao indicador destaque">
-              <div class="titulo-indicador"><span>Sites identificados</span><span class="bolinha"></span></div>
-              <strong id="totalSites" class="valor-indicador">0</strong>
-              <span class="descricao-indicador">serviços e domínios distintos</span>
+              <div class="titulo-indicador"><span>PS-indício</span><span class="bolinha"></span></div>
+              <strong id="computadoresPsIndicio" class="valor-indicador">0</strong>
+              <span class="descricao-indicador">artefatos compatíveis, sem confirmação</span>
+            </article>
+            <article class="cartao indicador neutro">
+              <div class="titulo-indicador"><span>Sem evidência</span><span class="bolinha"></span></div>
+              <strong id="computadoresSemEvidencia" class="valor-indicador">0</strong>
+              <span class="descricao-indicador">sem confirmação e sem indício heurístico</span>
             </article>
           </div>
         </div>
 
         <div class="resumo">
           <div class="simbolo-resumo">i</div>
-          <p id="textoResumo">O resultado combina serviços autenticados e sites marcados com autenticação provável.</p>
+          <p id="textoResumo">PS-confirmada e PS-indício são calculados separadamente e não compartilham o mesmo numerador.</p>
         </div>
 
         <article class="cartao cartao-composicao">
           <div class="cabecalho-secao">
             <div>
-              <h2>Composição dos sinais de sessão</h2>
-              <p>Participação dos sinais diretos e da autenticação provável no resultado.</p>
+              <h2>Detalhamento das evidências</h2>
+              <p>Separação entre confirmação de sessão, indícios heurísticos e sinais adicionais encontrados.</p>
             </div>
           </div>
           <div class="grade-composicao">
-            <div class="item-composicao"><strong id="computadoresSinalDireto">0</strong><span>computadores com serviço monitorado autenticado</span></div>
-            <div class="item-composicao"><strong id="computadoresSinalProvavel">0</strong><span>computadores com autenticação provável</span></div>
-            <div class="item-composicao"><strong id="somenteSinalProvavel">0</strong><span>computadores positivos somente pela heurística</span></div>
-            <div class="item-composicao"><strong id="computadoresSinaisCombinados">0</strong><span>computadores com os dois tipos de sinal</span></div>
+            <div class="item-composicao"><strong id="computadoresSinalDireto">0</strong><span>PS-confirmada total</span></div>
+            <div class="item-composicao"><strong id="somenteSinalProvavel">0</strong><span>PS-indício sem confirmação</span></div>
+            <div class="item-composicao"><strong id="computadoresSinaisCombinados">0</strong><span>PS-confirmada com indícios adicionais</span></div>
+            <div class="item-composicao"><strong id="totalSites">0</strong><span>sites e serviços distintos sinalizados</span></div>
           </div>
         </article>
 
@@ -1341,8 +1342,8 @@
           <article class="cartao cartao-secao">
             <div class="cabecalho-secao">
               <div>
-                <h2>Sites com evidência de sessão</h2>
-                <p>Sites e serviços ordenados pela quantidade de computadores.</p>
+                <h2>Sites e serviços sinalizados</h2>
+                <p>Evidências diretas e heurísticas exibidas sem tratá-las como equivalentes.</p>
               </div>
               <div class="campo somente-tela">
                 <label for="buscaSite">Localizar site</label>
@@ -1391,13 +1392,13 @@
         <div class="grade-metodo">
           <article class="cartao cartao-metodo">
             <div class="numero-metodo">01</div>
-            <h3>Critério do percentual</h3>
-            <p>Um computador entra no numerador quando ao menos um serviço fixo está autenticado ou quando um site possui <strong>autenticacao_provavel = true</strong>. O denominador considera somente relatórios válidos no filtro atual.</p>
+            <h3>Definição operacional</h3>
+            <p>Persistência de sessão é a identificação, no perfil do navegador, de estado autenticado confirmado ou de artefatos potencialmente associados à manutenção de uma sessão, como cookies de autenticação, tokens, Local Storage, Session Storage ou IndexedDB.</p>
           </article>
           <article class="cartao cartao-metodo">
             <div class="numero-metodo">02</div>
-            <h3>Leitura dos sites</h3>
-            <p>Serviços fixos e domínios encontrados pela heurística são exibidos separadamente. O mesmo site conta apenas uma vez por computador em cada origem.</p>
+            <h3>Critério dos indicadores</h3>
+            <p>PS-confirmada: máquina com ao menos um serviço monitorado marcado como autenticado. PS-indício: máquina sem PS-confirmada e com ao menos um site marcado com autenticacao_provavel = true. As categorias são mutuamente exclusivas; o denominador considera somente relatórios válidos no filtro atual.</p>
           </article>
           <article class="cartao cartao-metodo">
             <div class="numero-metodo">03</div>
@@ -1544,6 +1545,13 @@
         const evidenciasProvaveis = pegarSitesProvaveis(relatorio);
         const mapaEvidencias = new Map([...evidenciasFixas, ...evidenciasProvaveis].map((item) => [item.id, item]));
         const evidencias = Array.from(mapaEvidencias.values());
+        const temPsConfirmada = evidenciasFixas.length > 0;
+        const temPsIndicio = !temPsConfirmada && evidenciasProvaveis.length > 0;
+        const classificacao = temPsConfirmada
+          ? "ps-confirmada"
+          : temPsIndicio
+            ? "ps-indicio"
+            : "sem-evidencia";
 
         return {
           nomeArquivo,
@@ -1552,14 +1560,28 @@
           evidenciasFixas,
           evidenciasProvaveis,
           evidencias,
-          temEvidencia: evidencias.length > 0
+          temPsConfirmada,
+          temPsIndicio,
+          classificacao
         };
       }
 
       function filtrarComputadores() {
+        const classificacaoFiltro = {
+          confirmada: "ps-confirmada",
+          indicio: "ps-indicio",
+          "sem-evidencia": "sem-evidencia"
+        }[estado.situacao];
+
         return estado.computadores.filter((computador) => {
-          const mesmoPeriodo = estado.periodo === "todos" || computador.periodo === estado.periodo;
-          const mesmaSituacao = estado.situacao === "todos" || (estado.situacao === "positivo" ? computador.temEvidencia : !computador.temEvidencia);
+          const mesmoPeriodo =
+            estado.periodo === "todos" ||
+            computador.periodo === estado.periodo;
+
+          const mesmaSituacao =
+            estado.situacao === "todos" ||
+            computador.classificacao === classificacaoFiltro;
+
           return mesmoPeriodo && mesmaSituacao;
         });
       }
@@ -1567,26 +1589,23 @@
       function montarAnalise(computadores) {
         const dadosSites = new Map();
         const dadosServicos = new Map(SERVICOS_FIXOS.map((servico) => [servico.chave, { ...servico, quantidade: 0 }]));
-        let comEvidencia = 0;
-        let computadoresDiretos = 0;
-        let computadoresProvaveis = 0;
-        let apenasProvaveis = 0;
+        let psConfirmada = 0;
+        let psIndicio = 0;
         let sinaisCombinados = 0;
 
         for (const computador of computadores) {
-          if (computador.temEvidencia) {
-            comEvidencia += 1;
+          if (computador.classificacao === "ps-confirmada") {
+            psConfirmada += 1;
           }
-          if (computador.evidenciasFixas.length) {
-            computadoresDiretos += 1;
+
+          if (computador.classificacao === "ps-indicio") {
+            psIndicio += 1;
           }
-          if (computador.evidenciasProvaveis.length) {
-            computadoresProvaveis += 1;
-          }
-          if (!computador.evidenciasFixas.length && computador.evidenciasProvaveis.length) {
-            apenasProvaveis += 1;
-          }
-          if (computador.evidenciasFixas.length && computador.evidenciasProvaveis.length) {
+
+          if (
+            computador.evidenciasFixas.length &&
+            computador.evidenciasProvaveis.length
+          ) {
             sinaisCombinados += 1;
           }
 
@@ -1608,18 +1627,30 @@
         }
 
         const total = computadores.length;
-        const percentual = total ? (comEvidencia / total) * 100 : 0;
+
+        const semEvidencia =
+          total - psConfirmada - psIndicio;
+
+        const percentualConfirmada =
+          total ? (psConfirmada / total) * 100 : 0;
+
+        const percentualIndicio =
+          total ? (psIndicio / total) * 100 : 0;
+
+        const percentualSemEvidencia =
+          total ? (semEvidencia / total) * 100 : 0;
+
         const sites = Array.from(dadosSites.values()).sort((a, b) => b.quantidade - a.quantidade || a.nome.localeCompare(b.nome, "pt-BR"));
         const servicos = Array.from(dadosServicos.values()).sort((a, b) => b.quantidade - a.quantidade || a.nome.localeCompare(b.nome, "pt-BR"));
 
         return {
           total,
-          comEvidencia,
-          semEvidencia: total - comEvidencia,
-          percentual,
-          computadoresDiretos,
-          computadoresProvaveis,
-          apenasProvaveis,
+          psConfirmada,
+          psIndicio,
+          semEvidencia,
+          percentualConfirmada,
+          percentualIndicio,
+          percentualSemEvidencia,
           sinaisCombinados,
           sites,
           servicos,
@@ -1638,24 +1669,34 @@
         if (!analise.total) {
           return "Nenhum computador disponível no recorte atual. Ajuste os filtros para visualizar o resultado.";
         }
-        if (analise.percentual === 0) {
-          return "Nenhum relatório do recorte apresentou evidência de sessão persistente. O resultado reflete somente os sinais disponíveis no momento da coleta.";
-        }
-        if (analise.percentual < 25) {
-          return "A evidência está concentrada em uma parcela menor dos computadores. Consulte abaixo quais serviços ou sites geraram o resultado.";
-        }
-        if (analise.percentual < 60) {
-          return "A evidência aparece em uma parcela relevante dos computadores. Consulte abaixo quais serviços ou sites geraram o resultado.";
-        }
-        return "O percentual considera computadores com serviço autenticado ou site marcado com autenticação provável. Os rankings abaixo mostram exatamente onde os sinais foram encontrados.";
+
+        return `PS-confirmada: ${formatoNumero.format(
+          analise.psConfirmada
+        )} de ${formatoNumero.format(
+          analise.total
+        )} (${formatoPercentual.format(
+          analise.percentualConfirmada
+        )}%). PS-indício: ${formatoNumero.format(
+          analise.psIndicio
+        )} de ${formatoNumero.format(
+          analise.total
+        )} (${formatoPercentual.format(
+          analise.percentualIndicio
+        )}%). Sem evidência: ${formatoNumero.format(
+          analise.semEvidencia
+        )} de ${formatoNumero.format(
+          analise.total
+        )} (${formatoPercentual.format(
+          analise.percentualSemEvidencia
+        )}%).`;
       }
 
       function textoConfianca(dadoSite) {
         if (dadoSite.origem === "fixa") {
-          return "serviço monitorado";
+          return "PS-confirmada · serviço monitorado";
         }
         const itens = Array.from(dadoSite.contagemConfianca.entries()).sort((a, b) => b[1] - a[1]);
-        return itens.length ? `heurística · confiança ${itens[0][0]}` : "heurística";
+        return itens.length ? `indício heurístico · confiança ${itens[0][0]}` : "indício heurístico";
       }
 
       function mostrarRankingSites(analise) {
@@ -1718,6 +1759,21 @@
           const restantes = computador.evidencias.length - sitesVisiveis.length;
           const etiquetas = sitesVisiveis.map((site) => `<span class="etiqueta-site" title="${escaparHtml(site.nome)}">${escaparHtml(site.nome)}</span>`).join("");
           const adicional = restantes > 0 ? `<span class="etiqueta-site">+${restantes} outro${restantes === 1 ? "" : "s"}</span>` : "";
+          const resultado =
+            computador.classificacao === "ps-confirmada"
+              ? {
+                  classe: "positivo",
+                  texto: "PS-confirmada"
+                }
+              : computador.classificacao === "ps-indicio"
+                ? {
+                    classe: "heuristica",
+                    texto: "PS-indício"
+                  }
+                : {
+                    classe: "negativo",
+                    texto: "Sem evidência"
+                  };
           return `
             <tr>
               <td class="coluna-arquivo">
@@ -1725,7 +1781,7 @@
                 <span title="${escaparHtml(computador.caminhoArquivo || computador.nomeArquivo)}">${escaparHtml(computador.nomeArquivo)}</span>
               </td>
               <td>${escaparHtml(computador.periodo)}</td>
-              <td><span class="etiqueta ${computador.temEvidencia ? "positivo" : "negativo"}">${computador.temEvidencia ? "Com evidência de sessão" : "Sem evidência de sessão"}</span></td>
+              <td><span class="etiqueta ${resultado.classe}">${resultado.texto}</span></td>
               <td><div class="lista-etiquetas">${etiquetas}${adicional || (!computador.evidencias.length ? '<span class="etiqueta-site">Nenhum</span>' : "")}</div></td>
               <td>${computador.evidenciasFixas.length} direto${computador.evidenciasFixas.length === 1 ? "" : "s"}<br />${computador.evidenciasProvaveis.length} ${computador.evidenciasProvaveis.length === 1 ? "provável" : "prováveis"}</td>
             </tr>`;
@@ -1746,31 +1802,60 @@
       function atualizarPainel() {
         const computadores = filtrarComputadores();
         const analise = montarAnalise(computadores);
-        const textoPercentual = `${formatoPercentual.format(analise.percentual)}%`;
+        const textoPercentual =
+          `${formatoPercentual.format(analise.percentualConfirmada)}%`;
         const partesResumo = [estado.nomePasta, `${estado.computadores.length} arquivo${estado.computadores.length === 1 ? " válido" : "s válidos"}`];
         if (estado.periodo !== "todos") {
           partesResumo.push(`período ${estado.periodo}`);
         }
-        if (estado.situacao === "positivo") {
-          partesResumo.push("somente computadores com evidência");
+        if (estado.situacao === "confirmada") {
+          partesResumo.push("somente PS-confirmada");
         }
-        if (estado.situacao === "negativo") {
+        if (estado.situacao === "indicio") {
+          partesResumo.push("somente PS-indício");
+        }
+        if (estado.situacao === "sem-evidencia") {
           partesResumo.push("somente computadores sem evidência");
         }
         const textoEscopo = partesResumo.join(" · ");
 
-        document.getElementById("graficoPercentual").style.setProperty("--percentual", String(Math.max(0, Math.min(100, analise.percentual))));
+        document
+          .getElementById("graficoPercentual")
+          .style.setProperty(
+            "--percentual",
+            String(
+              Math.max(
+                0,
+                Math.min(100, analise.percentualConfirmada)
+              )
+            )
+          );
         document.getElementById("valorPercentual").textContent = textoPercentual;
-        document.getElementById("textoResultado").textContent = analise.total ? `${analise.comEvidencia} de ${analise.total} ${analise.total === 1 ? "computador possui" : "computadores possuem"} ao menos um serviço autenticado ou site com autenticação provável.` : "Nenhum computador no recorte.";
-        document.getElementById("descricaoResultado").textContent = "Resultado: percentual inicial de computadores com evidência de sessão persistente.";
-        document.getElementById("totalComputadores").textContent = formatoNumero.format(analise.total);
-        document.getElementById("computadoresComEvidencia").textContent = formatoNumero.format(analise.comEvidencia);
-        document.getElementById("computadoresSemEvidencia").textContent = formatoNumero.format(analise.semEvidencia);
-        document.getElementById("totalSites").textContent = formatoNumero.format(analise.totalSites);
-        document.getElementById("computadoresSinalDireto").textContent = formatoNumero.format(analise.computadoresDiretos);
-        document.getElementById("computadoresSinalProvavel").textContent = formatoNumero.format(analise.computadoresProvaveis);
-        document.getElementById("somenteSinalProvavel").textContent = formatoNumero.format(analise.apenasProvaveis);
+        document.getElementById("textoResultado").textContent =
+          analise.total
+            ? `${analise.psConfirmada} de ${analise.total} ${
+                analise.total === 1
+                  ? "computador possui"
+                  : "computadores possuem"
+              } PS-confirmada. ${analise.psIndicio} ${
+                analise.psIndicio === 1
+                  ? "possui"
+                  : "possuem"
+              } somente PS-indício.`
+            : "Nenhum computador no recorte.";
+        document.getElementById("descricaoResultado").textContent = "O gráfico principal exibe somente PS-confirmada. PS-indício é apresentado separadamente e não entra no mesmo numerador.";
+        document.getElementById("totalComputadores").textContent =
+          formatoNumero.format(analise.total);
+        document.getElementById("computadoresPsConfirmada").textContent =
+          formatoNumero.format(analise.psConfirmada);
+        document.getElementById("computadoresPsIndicio").textContent =
+          formatoNumero.format(analise.psIndicio);
+        document.getElementById("computadoresSemEvidencia").textContent =
+          formatoNumero.format(analise.semEvidencia);
+        document.getElementById("computadoresSinalDireto").textContent = formatoNumero.format(analise.psConfirmada);
+        document.getElementById("somenteSinalProvavel").textContent = formatoNumero.format(analise.psIndicio);
         document.getElementById("computadoresSinaisCombinados").textContent = formatoNumero.format(analise.sinaisCombinados);
+        document.getElementById("totalSites").textContent = formatoNumero.format(analise.totalSites);
         document.getElementById("textoResumo").textContent = montarTextoResumo(analise);
         document.getElementById("resumoPasta").textContent = textoEscopo;
         document.getElementById("escopoImpressao").textContent = textoEscopo;
