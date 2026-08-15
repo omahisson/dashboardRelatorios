@@ -1217,7 +1217,7 @@
           <div class="rotulo">Diagnóstico consolidado</div>
           <h1>Análise das informações coletadas.</h1>
           <p class="texto-inicio">
-            Visualize separadamente PS-confirmada, PS-indício e computadores sem evidência, identifique os sites envolvidos e gere um relatório completo.
+            Visualize separadamente persistência de sessão confirmada, persistência de sessão indício e computadores sem evidência, identifique os sites envolvidos e gere um relatório completo.
           </p>
           <div class="acoes-inicio">
             <button id="botaoEscolherPasta" class="botao botao-principal" type="button">
@@ -1288,7 +1288,7 @@
               </div>
             </div>
             <div class="texto-resultado">
-              <div class="rotulo-resultado">PS-confirmada</div>
+              <div class="rotulo-resultado">Persistência de sessão confirmada</div>
               <h2 id="textoResultado">Aguardando dados</h2>
               <p id="descricaoResultado">Selecione uma pasta para consolidar os relatórios.</p>
             </div>
@@ -1301,17 +1301,17 @@
               <span class="descricao-indicador">arquivos válidos no recorte</span>
             </article>
             <article class="cartao indicador alerta">
-              <div class="titulo-indicador"><span>PS-confirmada</span><span class="bolinha"></span></div>
+              <div class="titulo-indicador"><span>Persistência de sessão confirmada</span><span class="bolinha"></span></div>
               <strong id="computadoresPsConfirmada" class="valor-indicador">0</strong>
               <span class="descricao-indicador">sessão autenticada detectada</span>
             </article>
             <article class="cartao indicador destaque">
-              <div class="titulo-indicador"><span>PS-indício</span><span class="bolinha"></span></div>
+              <div class="titulo-indicador"><span>Computadores com apenas indício de persistência de sessão</span><span class="bolinha"></span></div>
               <strong id="computadoresPsIndicio" class="valor-indicador">0</strong>
               <span class="descricao-indicador">artefatos compatíveis, sem confirmação</span>
             </article>
             <article class="cartao indicador neutro">
-              <div class="titulo-indicador"><span>Sem evidência</span><span class="bolinha"></span></div>
+              <div class="titulo-indicador"><span>Nenhum artefato salvo</span><span class="bolinha"></span></div>
               <strong id="computadoresSemEvidencia" class="valor-indicador">0</strong>
               <span class="descricao-indicador">sem confirmação e sem indício heurístico</span>
             </article>
@@ -1320,7 +1320,7 @@
 
         <div class="resumo">
           <div class="simbolo-resumo">i</div>
-          <p id="textoResumo">PS-confirmada e PS-indício são calculados separadamente e não compartilham o mesmo numerador.</p>
+          <p id="textoResumo">Persistência de sessão confirmada e persistência de sessão indício são calculados separadamente e não compartilham o mesmo numerador.</p>
         </div>
 
         <article class="cartao cartao-composicao">
@@ -1331,9 +1331,9 @@
             </div>
           </div>
           <div class="grade-composicao">
-            <div class="item-composicao"><strong id="computadoresSinalDireto">0</strong><span>PS-confirmada total</span></div>
-            <div class="item-composicao"><strong id="somenteSinalProvavel">0</strong><span>PS-indício sem confirmação</span></div>
-            <div class="item-composicao"><strong id="computadoresSinaisCombinados">0</strong><span>PS-confirmada com indícios adicionais</span></div>
+            <div class="item-composicao"><strong id="computadoresSinalDireto">0</strong><span>Persistência de sessão confirmada total</span></div>
+            <div class="item-composicao"><strong id="somenteSinalProvavel">0</strong><span>Persistência de sessão indício sem confirmação</span></div>
+            <div class="item-composicao"><strong id="computadoresSinaisCombinados">0</strong><span>Persistência de sessão confirmada com indícios adicionais</span></div>
             <div class="item-composicao"><strong id="totalSites">0</strong><span>sites e serviços distintos sinalizados</span></div>
           </div>
         </article>
@@ -1682,7 +1682,7 @@
           analise.total
         )} (${formatoPercentual.format(
           analise.percentualIndicio
-        )}%). Sem evidência: ${formatoNumero.format(
+        )}%). Nenhum artefato salvo: ${formatoNumero.format(
           analise.semEvidencia
         )} de ${formatoNumero.format(
           analise.total
@@ -1837,11 +1837,11 @@
                 analise.total === 1
                   ? "computador possui"
                   : "computadores possuem"
-              } PS-confirmada. ${analise.psIndicio} ${
+              } persistência de sessão confirmada em algum site. ${analise.psIndicio} ${
                 analise.psIndicio === 1
                   ? "possui"
                   : "possuem"
-              } somente PS-indício.`
+              } somente indício de persistência de sessão.`
             : "Nenhum computador no recorte.";
         document.getElementById("descricaoResultado").textContent = "O gráfico principal exibe somente PS-confirmada. PS-indício é apresentado separadamente e não entra no mesmo numerador.";
         document.getElementById("totalComputadores").textContent =
